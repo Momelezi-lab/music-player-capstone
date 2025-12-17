@@ -1,3 +1,219 @@
+/**
+ * ============================================================================
+ * GLOBAL STYLES - Music Player App
+ * Created by: Apiwe Fuziile
+ * ============================================================================
+ * 
+ * This file contains the global CSS styles for my music player application.
+ * I'm using Tailwind CSS for most styling, but this file handles:
+ * - Tailwind directives (base, components, utilities)
+ * - Custom fonts from Google Fonts
+ * - Custom scrollbar styling
+ * - CSS animations and keyframes
+ * - Global resets and base styles
+ * ============================================================================
+ */
+
+/* Import Google Fonts - I chose Outfit for its modern, clean look */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Tailwind CSS Directives - These inject Tailwind's styles */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================================
+   BASE STYLES
+   Applied to all elements by default
+   ============================================================================ */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #0f0a1e;
+  color: white;
+  min-height: 100vh;
+}
+
+/* ============================================================================
+   CUSTOM SCROLLBAR
+   A sleek, thin scrollbar that matches my app's dark theme
+   ============================================================================ */
+
+/* For Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #d946ef, #ec4899);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #e879f9, #f472b6);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d946ef rgba(255, 255, 255, 0.05);
+}
+
+/* Hide scrollbar utility class - used for horizontal favorites scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================================================================
+   CUSTOM ANIMATIONS
+   Additional animations beyond Tailwind's defaults
+   ============================================================================ */
+
+/* Pulse animation for the "now playing" indicator bars */
+@keyframes soundwave {
+  0%, 100% {
+    height: 4px;
+  }
+  50% {
+    height: 16px;
+  }
+}
+
+/* Gradient text animation - makes the title shimmer */
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Floating animation for decorative elements */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* ============================================================================
+   INPUT STYLES
+   Custom styling for form inputs (range sliders, etc.)
+   ============================================================================ */
+
+/* Style the volume slider track */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Style the volume slider thumb (the draggable circle) */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, #d946ef, #ec4899);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 10px rgba(217, 70, 239, 0.4);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Firefox thumb styling */
+input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, #d946ef, #ec4899);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 10px rgba(217, 70, 239, 0.4);
+}
+
+/* ============================================================================
+   SELECTION STYLES
+   Custom text selection colors to match the theme
+   ============================================================================ */
+
+::selection {
+  background: rgba(217, 70, 239, 0.3);
+  color: white;
+}
+
+::-moz-selection {
+  background: rgba(217, 70, 239, 0.3);
+  color: white;
+}
+
+/* ============================================================================
+   FOCUS STYLES
+   Accessible focus indicators that match the design
+   ============================================================================ */
+
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid #d946ef;
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   UTILITY CLASSES
+   Custom utility classes for specific use cases
+   ============================================================================ */
+
+/* Glass morphism effect */
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient text utility */
+.text-gradient {
+  background: linear-gradient(135deg, #d946ef, #ec4899, #06b6d4);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-shift 3s ease infinite;
+}
