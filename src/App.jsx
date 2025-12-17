@@ -297,53 +297,121 @@ function App() {
   // ============================================================================
   // LANDING PAGE COMPONENT
   // Beautiful welcome screen shown when user first opens the app
+  // Using inline styles for guaranteed compatibility
   // ============================================================================
   if (showLanding) {
     return (
       <div
-        className={`min-h-screen flex flex-col items-center justify-center relative overflow-hidden transition-opacity duration-500 ${
-          isTransitioning ? "opacity-0" : "opacity-100"
-        }`}
         style={{
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          position: "relative",
+          overflow: "hidden",
           background:
             "linear-gradient(135deg, #1a1040 0%, #2d1b69 25%, #1e3a5f 50%, #2d1b69 75%, #1a1040 100%)",
+          opacity: isTransitioning ? 0 : 1,
+          transition: "opacity 0.5s ease",
         }}
       >
         {/* Ambient background glow effects */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-3xl"></div>
+        <div style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
+          <div
+            style={{
+              position: "absolute",
+              top: "25%",
+              left: "25%",
+              width: "400px",
+              height: "400px",
+              background: "rgba(147, 51, 234, 0.2)",
+              borderRadius: "50%",
+              filter: "blur(80px)",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              bottom: "25%",
+              right: "25%",
+              width: "400px",
+              height: "400px",
+              background: "rgba(37, 99, 235, 0.2)",
+              borderRadius: "50%",
+              filter: "blur(80px)",
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: "600px",
+              height: "600px",
+              background: "rgba(99, 102, 241, 0.1)",
+              borderRadius: "50%",
+              filter: "blur(100px)",
+            }}
+          />
         </div>
 
         {/* Main content container */}
-        <div className="relative z-10 text-center px-6">
+        <div
+          style={{
+            position: "relative",
+            zIndex: 10,
+            textAlign: "center",
+            padding: "0 24px",
+          }}
+        >
           {/* Music note icon with gradient background */}
-          <div className="mb-8 inline-block">
+          <div style={{ marginBottom: "32px" }}>
             <div
-              className="w-28 h-28 rounded-3xl flex items-center justify-center shadow-2xl shadow-purple-500/30"
               style={{
+                width: "112px",
+                height: "112px",
+                borderRadius: "24px",
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
                 background:
                   "linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #c4b5fd 100%)",
+                boxShadow: "0 25px 50px -12px rgba(147, 51, 234, 0.3)",
               }}
             >
-              <IoMusicalNote className="text-5xl text-white" />
+              <IoMusicalNote style={{ fontSize: "48px", color: "white" }} />
             </div>
           </div>
 
           {/* App name - NovaBeat style */}
           <h1
-            className="text-7xl md:text-8xl font-extralight tracking-tight mb-6"
             style={{
+              fontSize: "clamp(56px, 10vw, 96px)",
+              fontWeight: 200,
+              letterSpacing: "-0.02em",
+              marginBottom: "24px",
               color: "#a5b4fc",
               textShadow: "0 0 40px rgba(165, 180, 252, 0.3)",
+              fontFamily: "'Outfit', system-ui, sans-serif",
             }}
           >
             NovaBeat
           </h1>
 
           {/* Tagline description */}
-          <p className="text-xl md:text-2xl text-indigo-200/80 max-w-lg mx-auto mb-12 leading-relaxed font-light">
+          <p
+            style={{
+              fontSize: "clamp(18px, 3vw, 24px)",
+              color: "rgba(199, 210, 254, 0.8)",
+              maxWidth: "500px",
+              margin: "0 auto 48px auto",
+              lineHeight: 1.6,
+              fontWeight: 300,
+              fontFamily: "'Outfit', system-ui, sans-serif",
+            }}
+          >
             Experience music in a whole new dimension. Your personal futuristic
             music player.
           </p>
@@ -351,63 +419,109 @@ function App() {
           {/* Enter button with glassmorphism effect */}
           <button
             onClick={handleEnterApp}
-            className="group relative px-12 py-5 rounded-2xl font-medium text-lg transition-all duration-300 hover:scale-105 mb-16"
             style={{
+              padding: "20px 48px",
+              borderRadius: "16px",
+              fontSize: "18px",
+              fontWeight: 500,
+              cursor: "pointer",
+              marginBottom: "64px",
               background: "rgba(255, 255, 255, 0.08)",
               backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
               border: "1px solid rgba(255, 255, 255, 0.15)",
               color: "#c7d2fe",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "12px",
+              transition: "all 0.3s ease",
+              fontFamily: "'Outfit', system-ui, sans-serif",
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = "scale(1.05)";
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.12)";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = "scale(1)";
+              e.currentTarget.style.background = "rgba(255, 255, 255, 0.08)";
             }}
           >
-            <span className="flex items-center gap-3">
-              <svg
-                className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M8 5v14l11-7z" />
-              </svg>
-              Enter NovaBeat
-            </span>
+            <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M8 5v14l11-7z" />
+            </svg>
+            Enter NovaBeat
           </button>
 
           {/* Feature badges */}
-          <div className="flex flex-wrap justify-center gap-8 md:gap-12">
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-pink-400"></div>
-              <span className="text-indigo-200/70 text-sm font-light">
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              justifyContent: "center",
+              gap: "32px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: "#f472b6",
+                }}
+              />
+              <span
+                style={{
+                  color: "rgba(199, 210, 254, 0.7)",
+                  fontSize: "14px",
+                  fontWeight: 300,
+                  fontFamily: "'Outfit', system-ui, sans-serif",
+                }}
+              >
                 Smart Playlists
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-              <span className="text-indigo-200/70 text-sm font-light">
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: "#60a5fa",
+                }}
+              />
+              <span
+                style={{
+                  color: "rgba(199, 210, 254, 0.7)",
+                  fontSize: "14px",
+                  fontWeight: 300,
+                  fontFamily: "'Outfit', system-ui, sans-serif",
+                }}
+              >
                 HD Audio
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-              <span className="text-indigo-200/70 text-sm font-light">
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  background: "#a78bfa",
+                }}
+              />
+              <span
+                style={{
+                  color: "rgba(199, 210, 254, 0.7)",
+                  fontSize: "14px",
+                  fontWeight: 300,
+                  fontFamily: "'Outfit', system-ui, sans-serif",
+                }}
+              >
                 Offline Mode
               </span>
             </div>
           </div>
-        </div>
-
-        {/* Subtle animated particles/dots */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(20)].map((_, i) => (
-            <div
-              key={i}
-              className="absolute w-1 h-1 bg-white/20 rounded-full animate-pulse"
-              style={{
-                left: `${Math.random() * 100}%`,
-                top: `${Math.random() * 100}%`,
-                animationDelay: `${Math.random() * 3}s`,
-                animationDuration: `${2 + Math.random() * 3}s`,
-              }}
-            />
-          ))}
         </div>
       </div>
     );
