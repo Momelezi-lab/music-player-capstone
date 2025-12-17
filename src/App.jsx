@@ -53,6 +53,9 @@ function App() {
   // Trending tracks - fetched from Deezer API
   const [trendingTracks, setTrendingTracks] = useState([]);
 
+  // Mobile menu state - controls sidebar visibility on mobile
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+
   // ============================================================================
   // REFS SECTION
   // Refs allow me to directly access DOM elements (like the audio player)
@@ -83,17 +86,32 @@ function App() {
 
   /**
    * EFFECT: Fetch trending tracks from Deezer API on mount
+   * Using CORS proxy to bypass browser restrictions
    */
   useEffect(() => {
     const fetchTrending = async () => {
       try {
-        // Fetch top chart tracks from Deezer
+        // Fetch top chart tracks from Deezer using CORS proxy
         const response = await axios.get(
-          "https://api.deezer.com/chart/0/tracks"
+          "https://corsproxy.io/?https://api.deezer.com/chart/0/tracks"
         );
-        setTrendingTracks(response.data.data.slice(0, 8));
+        setTrendingTracks(response.data.data.slice(0, 10));
       } catch (error) {
         console.error("Error fetching trending tracks:", error);
+        // Fallback: try alternative proxy
+        try {
+          const fallbackResponse = await axios.get(
+            "https://api.allorigins.win/raw?url=" +
+              encodeURIComponent("https://api.deezer.com/chart/0/tracks")
+          );
+          const data =
+            typeof fallbackResponse.data === "string"
+              ? JSON.parse(fallbackResponse.data)
+              : fallbackResponse.data;
+          setTrendingTracks(data.data.slice(0, 10));
+        } catch (fallbackError) {
+          console.error("Fallback also failed:", fallbackError);
+        }
       }
     };
     fetchTrending();
@@ -133,11 +151,12 @@ function App() {
 
   /**
    * searchMusic - Fetches songs from Deezer API based on user's search query
+   * Using CORS proxy to bypass browser restrictions
    *
    * How it works:
    * 1. Check if the search query is not empty
    * 2. Set loading state to show the spinner
-   * 3. Make GET request to Deezer's search endpoint
+   * 3. Make GET request to Deezer's search endpoint via CORS proxy
    * 4. Store the first 12 results in our tracks state
    * 5. Handle any errors gracefully
    */
@@ -147,17 +166,34 @@ function App() {
 
     setLoading(true); // Show loading indicator
     try {
-      // Make API request to Deezer
-      // encodeURIComponent ensures special characters in the query are properly escaped
+      // Make API request to Deezer using CORS proxy
       const response = await axios.get(
-        `https://api.deezer.com/search?q=${encodeURIComponent(query)}`
+        `https://corsproxy.io/?https://api.deezer.com/search?q=${encodeURIComponent(
+          query
+        )}`
       );
       // Take only the first 12 tracks for a clean grid display
       setTracks(response.data.data.slice(0, 12));
     } catch (error) {
-      // Log the error for debugging and show user-friendly message
+      // Log the error for debugging
       console.error("Error fetching music:", error);
-      alert("Something went wrong. Try again!");
+      // Try fallback proxy
+      try {
+        const fallbackResponse = await axios.get(
+          "https://api.allorigins.win/raw?url=" +
+            encodeURIComponent(
+              `https://api.deezer.com/search?q=${encodeURIComponent(query)}`
+            )
+        );
+        const data =
+          typeof fallbackResponse.data === "string"
+            ? JSON.parse(fallbackResponse.data)
+            : fallbackResponse.data;
+        setTracks(data.data.slice(0, 12));
+      } catch (fallbackError) {
+        console.error("Fallback also failed:", fallbackError);
+        alert("Something went wrong. Try again!");
+      }
     } finally {
       // Always hide loading indicator when done (success or failure)
       setLoading(false);
@@ -582,6 +618,7 @@ function App() {
           HEADER
           ================================================================ */}
       <header
+        className="app-header"
         style={{
           display: "flex",
           alignItems: "center",
@@ -591,6 +628,23 @@ function App() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {/* Mobile Menu Button */}
+          <button
+            className="mobile-menu-btn"
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            style={{
+              display: "none",
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              padding: "8px",
+              color: "white",
+            }}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" />
+            </svg>
+          </button>
           <div
             style={{
               width: "44px",
@@ -607,7 +661,10 @@ function App() {
           <span style={{ fontSize: "22px", fontWeight: 500 }}>NovaBeat</span>
         </div>
 
-        <div style={{ flex: 1, maxWidth: "500px", margin: "0 24px" }}>
+        <div
+          className="search-container"
+          style={{ flex: 1, maxWidth: "500px", margin: "0 24px" }}
+        >
           <div style={{ position: "relative" }}>
             <FaSearch
               style={{
@@ -661,6 +718,7 @@ function App() {
           MAIN 3-COLUMN LAYOUT
           ================================================================ */}
       <div
+        className="main-grid-layout"
         style={{
           display: "grid",
           gridTemplateColumns: currentTrack ? "280px 1fr 300px" : "280px 1fr",
@@ -670,13 +728,55 @@ function App() {
         {/* ============================================================
             LEFT SIDEBAR - Playlists
             ============================================================ */}
+        {/* Mobile Menu Overlay */}
+        {showMobileMenu && (
+          <div
+            className="mobile-menu-overlay"
+            onClick={() => setShowMobileMenu(false)}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(0,0,0,0.5)",
+              zIndex: 998,
+              display: "none",
+            }}
+          />
+        )}
+
         <aside
+          className={`left-sidebar ${showMobileMenu ? "mobile-menu-open" : ""}`}
           style={{
             padding: "24px 16px",
             borderRight: "1px solid rgba(255,255,255,0.05)",
             overflowY: "auto",
           }}
         >
+          {/* Mobile Close Button */}
+          <button
+            className="mobile-close-btn"
+            onClick={() => setShowMobileMenu(false)}
+            style={{
+              display: "none",
+              position: "absolute",
+              top: "16px",
+              right: "16px",
+              background: "rgba(255,255,255,0.1)",
+              border: "none",
+              borderRadius: "8px",
+              width: "32px",
+              height: "32px",
+              cursor: "pointer",
+              color: "white",
+            }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
+            </svg>
+          </button>
+
           <p
             style={{
               fontSize: "12px",
@@ -793,7 +893,10 @@ function App() {
                   cursor: "pointer",
                   marginTop: "4px",
                 }}
-                onClick={() => playTrack(track)}
+                onClick={() => {
+                  playTrack(track);
+                  setShowMobileMenu(false);
+                }}
                 onMouseOver={(e) =>
                   (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
                 }
@@ -893,7 +996,10 @@ function App() {
                   cursor: "pointer",
                   marginTop: "4px",
                 }}
-                onClick={() => playTrack(track)}
+                onClick={() => {
+                  playTrack(track);
+                  setShowMobileMenu(false);
+                }}
                 onMouseOver={(e) =>
                   (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
                 }
@@ -937,7 +1043,10 @@ function App() {
         {/* ============================================================
             CENTER - All Songs List
             ============================================================ */}
-        <main style={{ padding: "24px", overflowY: "auto" }}>
+        <main
+          className="main-content"
+          style={{ padding: "24px", overflowY: "auto" }}
+        >
           <div
             style={{
               background: "rgba(255,255,255,0.03)",
@@ -1144,6 +1253,7 @@ function App() {
             ============================================================ */}
         {currentTrack && (
           <aside
+            className="now-playing-sidebar"
             style={{
               padding: "24px 16px",
               borderLeft: "1px solid rgba(255,255,255,0.05)",
@@ -1374,11 +1484,248 @@ function App() {
         )}
       </div>
 
-      {/* Responsive styles for mobile */}
+      {/* Comprehensive Responsive Styles */}
       <style>{`
+        /* Tablet Styles (768px - 1024px) */
         @media (max-width: 1024px) {
-          .main-layout {
+          .main-grid-layout {
+            grid-template-columns: 240px 1fr !important;
+          }
+          
+          .now-playing-sidebar {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            max-height: 50vh !important;
+            border-left: none !important;
+            border-top: 1px solid rgba(255,255,255,0.1) !important;
+            background: rgba(15, 10, 30, 0.98) !important;
+            backdrop-filter: blur(20px) !important;
+            z-index: 1000 !important;
+            overflow-y: auto !important;
+            padding: 16px !important;
+          }
+          
+          .app-header {
+            padding: 12px 16px !important;
+          }
+          
+          .search-container {
+            margin: 0 12px !important;
+          }
+          
+          .left-sidebar {
+            padding: 16px 12px !important;
+          }
+          
+          .main-content {
+            padding: 16px !important;
+          }
+        }
+        
+        /* Mobile Styles (< 768px) */
+        @media (max-width: 768px) {
+          .main-grid-layout {
             grid-template-columns: 1fr !important;
+            min-height: calc(100vh - 65px) !important;
+          }
+          
+          .app-header {
+            flex-wrap: wrap !important;
+            padding: 12px !important;
+            gap: 12px !important;
+          }
+          
+          .app-header > div:first-child {
+            font-size: 18px !important;
+          }
+          
+          .app-header > div:first-child > div {
+            width: 36px !important;
+            height: 36px !important;
+          }
+          
+          .app-header > div:first-child > div > svg {
+            font-size: 18px !important;
+          }
+          
+          .search-container {
+            order: 3 !important;
+            flex: 1 1 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            margin-top: 8px !important;
+          }
+          
+          .search-container input {
+            font-size: 14px !important;
+            padding: 10px 14px 10px 40px !important;
+          }
+          
+          .mobile-menu-btn {
+            display: block !important;
+          }
+          
+          .left-sidebar {
+            position: fixed !important;
+            top: 65px !important;
+            left: -100% !important;
+            width: 280px !important;
+            height: calc(100vh - 65px) !important;
+            background: rgba(15, 10, 30, 0.98) !important;
+            backdrop-filter: blur(20px) !important;
+            z-index: 999 !important;
+            transition: left 0.3s ease !important;
+            border-right: 1px solid rgba(255,255,255,0.1) !important;
+            box-shadow: 2px 0 20px rgba(0,0,0,0.3) !important;
+          }
+          
+          .left-sidebar.mobile-menu-open {
+            left: 0 !important;
+          }
+          
+          .mobile-menu-overlay {
+            display: block !important;
+          }
+          
+          .mobile-close-btn {
+            display: block !important;
+          }
+          
+          .main-content {
+            padding: 12px !important;
+          }
+          
+          .main-content > div {
+            padding: 16px !important;
+          }
+          
+          .main-content h2 {
+            font-size: 18px !important;
+          }
+          
+          .now-playing-sidebar {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            max-height: 60vh !important;
+            border-left: none !important;
+            border-top: 1px solid rgba(255,255,255,0.1) !important;
+            background: rgba(15, 10, 30, 0.98) !important;
+            backdrop-filter: blur(20px) !important;
+            z-index: 1000 !important;
+            overflow-y: auto !important;
+            padding: 16px 12px !important;
+          }
+          
+          .now-playing-sidebar img {
+            width: 150px !important;
+            height: 150px !important;
+            margin-bottom: 16px !important;
+          }
+          
+          .now-playing-sidebar h3 {
+            font-size: 18px !important;
+          }
+          
+          .now-playing-sidebar > div:last-child {
+            gap: 8px !important;
+          }
+          
+          .now-playing-sidebar button {
+            width: 48px !important;
+            height: 48px !important;
+          }
+          
+          .now-playing-sidebar button svg {
+            font-size: 16px !important;
+          }
+        }
+        
+        /* Small Mobile (< 480px) */
+        @media (max-width: 480px) {
+          .app-header {
+            padding: 10px !important;
+          }
+          
+          .app-header > div:first-child {
+            font-size: 16px !important;
+          }
+          
+          .app-header > div:first-child > div {
+            width: 32px !important;
+            height: 32px !important;
+          }
+          
+          .search-container input {
+            font-size: 13px !important;
+            padding: 8px 12px 8px 36px !important;
+          }
+          
+          .main-content {
+            padding: 8px !important;
+          }
+          
+          .main-content > div {
+            padding: 12px !important;
+          }
+          
+          .main-content > div > div {
+            padding: 8px !important;
+            gap: 10px !important;
+          }
+          
+          .main-content img {
+            width: 40px !important;
+            height: 40px !important;
+          }
+          
+          .main-content p {
+            font-size: 13px !important;
+          }
+          
+          .now-playing-sidebar {
+            padding: 12px 8px !important;
+            max-height: 70vh !important;
+          }
+          
+          .now-playing-sidebar img {
+            width: 120px !important;
+            height: 120px !important;
+          }
+          
+          .now-playing-sidebar h3 {
+            font-size: 16px !important;
+          }
+          
+          .now-playing-sidebar > div:nth-child(2) {
+            font-size: 12px !important;
+          }
+          
+          .now-playing-sidebar > div:nth-child(3) {
+            font-size: 11px !important;
+          }
+        }
+        
+        /* Landscape Mobile */
+        @media (max-width: 768px) and (orientation: landscape) {
+          .now-playing-sidebar {
+            max-height: 80vh !important;
+          }
+        }
+        
+        /* Large Desktop (> 1400px) */
+        @media (min-width: 1400px) {
+          .left-sidebar {
+            padding: 32px 20px !important;
+          }
+          
+          .main-content {
+            padding: 32px !important;
           }
         }
       `}</style>
