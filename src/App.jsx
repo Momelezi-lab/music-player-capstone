@@ -65,6 +65,15 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Recently played tracks - loaded from localStorage
+  const [recentlyPlayed, setRecentlyPlayed] = useState(() => {
+    const saved = localStorage.getItem("recentlyPlayed");
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Trending tracks - fetched from Deezer API
+  const [trendingTracks, setTrendingTracks] = useState([]);
+
   // ============================================================================
   // REFS SECTION
   // Refs allow me to directly access DOM elements (like the audio player)
@@ -85,6 +94,31 @@ function App() {
   useEffect(() => {
     localStorage.setItem("musicFavorites", JSON.stringify(favorites));
   }, [favorites]);
+
+  /**
+   * EFFECT: Save recently played to localStorage
+   */
+  useEffect(() => {
+    localStorage.setItem("recentlyPlayed", JSON.stringify(recentlyPlayed));
+  }, [recentlyPlayed]);
+
+  /**
+   * EFFECT: Fetch trending tracks from Deezer API on mount
+   */
+  useEffect(() => {
+    const fetchTrending = async () => {
+      try {
+        // Fetch top chart tracks from Deezer
+        const response = await axios.get(
+          "https://api.deezer.com/chart/0/tracks"
+        );
+        setTrendingTracks(response.data.data.slice(0, 8));
+      } catch (error) {
+        console.error("Error fetching trending tracks:", error);
+      }
+    };
+    fetchTrending();
+  }, []);
 
   /**
    * EFFECT: Update audio volume
@@ -164,10 +198,18 @@ function App() {
    * 1. Sets the current track to the selected one
    * 2. Updates the audio source
    * 3. Starts playback
+   * 4. Adds track to recently played list
    */
   const playTrack = (track) => {
     setCurrentTrack(track);
     setIsPlaying(true);
+
+    // Add to recently played (avoid duplicates, keep most recent at top)
+    setRecentlyPlayed((prev) => {
+      const filtered = prev.filter((t) => t.id !== track.id);
+      return [track, ...filtered].slice(0, 10); // Keep last 10 tracks
+    });
+
     // Wait for state to update, then play the audio
     setTimeout(() => {
       if (audioRef.current) {
@@ -530,391 +572,730 @@ function App() {
   // ============================================================================
   // MAIN MUSIC PLAYER
   // The full music player interface shown after clicking "Enter"
+  // Using inline styles for guaranteed compatibility
   // ============================================================================
+
+  // Styles object for cleaner code
+  const styles = {
+    container: {
+      minHeight: "100vh",
+      background:
+        "linear-gradient(135deg, #0f0a1e 0%, #1a1040 30%, #2d1b4e 60%, #1a1040 100%)",
+      color: "white",
+      fontFamily: "'Outfit', system-ui, sans-serif",
+      paddingBottom: currentTrack ? "100px" : "0",
+    },
+    header: {
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: "20px 32px",
+      borderBottom: "1px solid rgba(255,255,255,0.05)",
+    },
+    logoSection: {
+      display: "flex",
+      alignItems: "center",
+      gap: "12px",
+    },
+    logoIcon: {
+      width: "48px",
+      height: "48px",
+      borderRadius: "14px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)",
+    },
+    logoText: {
+      fontSize: "24px",
+      fontWeight: 500,
+      color: "white",
+    },
+    searchBar: {
+      flex: 1,
+      maxWidth: "500px",
+      margin: "0 32px",
+    },
+    searchInput: {
+      width: "100%",
+      padding: "14px 20px 14px 48px",
+      borderRadius: "30px",
+      border: "1px solid rgba(255,255,255,0.1)",
+      background: "rgba(255,255,255,0.05)",
+      color: "white",
+      fontSize: "15px",
+      outline: "none",
+      fontFamily: "'Outfit', system-ui, sans-serif",
+    },
+    favoritesButton: {
+      width: "48px",
+      height: "48px",
+      borderRadius: "50%",
+      border: "1px solid rgba(255,255,255,0.1)",
+      background: "transparent",
+      color: "white",
+      cursor: "pointer",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    mainContent: {
+      padding: "32px",
+    },
+    sectionLabel: {
+      fontSize: "13px",
+      fontWeight: 500,
+      color: "rgba(255,255,255,0.5)",
+      letterSpacing: "1px",
+      marginBottom: "20px",
+    },
+    card: {
+      background: "rgba(255,255,255,0.03)",
+      border: "1px solid rgba(255,255,255,0.08)",
+      borderRadius: "16px",
+      padding: "20px",
+      marginBottom: "16px",
+    },
+    cardHeader: {
+      display: "flex",
+      alignItems: "center",
+      gap: "16px",
+    },
+    iconCircle: {
+      width: "48px",
+      height: "48px",
+      borderRadius: "14px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    cardTitle: {
+      fontSize: "18px",
+      fontWeight: 600,
+      color: "white",
+      margin: 0,
+    },
+    cardSubtitle: {
+      fontSize: "14px",
+      color: "rgba(255,255,255,0.5)",
+      margin: "4px 0 0 0",
+    },
+    trackItem: {
+      display: "flex",
+      alignItems: "center",
+      gap: "14px",
+      padding: "12px 0",
+      cursor: "pointer",
+      borderRadius: "8px",
+      transition: "background 0.2s",
+    },
+    trackImage: {
+      width: "48px",
+      height: "48px",
+      borderRadius: "8px",
+      objectFit: "cover",
+    },
+    trackInfo: {
+      flex: 1,
+    },
+    trackTitle: {
+      fontSize: "15px",
+      fontWeight: 500,
+      color: "white",
+      margin: 0,
+    },
+    trackArtist: {
+      fontSize: "13px",
+      color: "rgba(255,255,255,0.5)",
+      margin: "2px 0 0 0",
+    },
+  };
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-purple-950 to-slate-900 text-white font-sans animate-fadeIn">
-      {/* ================================================================
-          HIDDEN AUDIO ELEMENT
-          This is the actual audio player - hidden because I use custom controls
-          ================================================================ */}
+    <div style={styles.container}>
+      {/* Hidden audio element for playback */}
       {currentTrack && (
         <audio
           ref={audioRef}
           src={currentTrack.preview}
           onTimeUpdate={handleTimeUpdate}
-          onEnded={playNext} // Auto-play next track when current ends
+          onEnded={playNext}
           onPlay={() => setIsPlaying(true)}
           onPause={() => setIsPlaying(false)}
         />
       )}
 
       {/* ================================================================
-          MAIN CONTENT CONTAINER
-          Contains the header, search, and music grid
-          pb-32 adds padding at bottom to prevent Now Playing bar overlap
+          HEADER - Logo, Search Bar, Favorites Button
           ================================================================ */}
-      <div className="container mx-auto px-4 py-8 pb-32">
-        {/* ==============================================================
-            HEADER SECTION
-            App title with music icon and animated gradient text
-            ============================================================== */}
-        <header className="text-center mb-12">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <div
-              className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/30"
-              style={{
-                background:
-                  "linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #c4b5fd 100%)",
-              }}
-            >
-              <IoMusicalNote className="text-3xl text-white" />
-            </div>
+      <header style={styles.header}>
+        {/* Logo Section */}
+        <div style={styles.logoSection}>
+          <div style={styles.logoIcon}>
+            <IoMusicalNote style={{ fontSize: "24px", color: "white" }} />
           </div>
-          <h1
-            className="text-5xl md:text-6xl font-extralight tracking-tight mb-2"
-            style={{ color: "#a5b4fc" }}
-          >
-            NovaBeat
-          </h1>
-          <p className="text-slate-400 mt-3 text-lg">
-            Discover & play your favorite music
-          </p>
-        </header>
+          <span style={styles.logoText}>NovaBeat</span>
+        </div>
 
-        {/* ==============================================================
-            SEARCH BAR SECTION
-            Input field with search button - uses glassmorphism styling
-            ============================================================== */}
-        <div className="max-w-2xl mx-auto mb-12">
-          <div className="flex gap-3 bg-white/5 backdrop-blur-xl p-2 rounded-2xl border border-white/10 shadow-2xl">
-            <div className="flex-1 flex items-center gap-3 px-4">
-              <FaSearch className="text-slate-400 text-xl" />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && searchMusic()}
-                placeholder="Search songs, artists, albums..."
-                className="flex-1 bg-transparent py-4 text-lg outline-none placeholder:text-slate-500"
-              />
-            </div>
-            <button
-              onClick={searchMusic}
-              className="px-8 py-4 rounded-xl font-bold text-lg shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-indigo-500/25"
+        {/* Search Bar */}
+        <div style={styles.searchBar}>
+          <div style={{ position: "relative" }}>
+            <FaSearch
               style={{
-                background: "linear-gradient(135deg, #818cf8 0%, #a78bfa 100%)",
+                position: "absolute",
+                left: "18px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "rgba(255,255,255,0.4)",
+                fontSize: "16px",
               }}
-            >
-              Search
-            </button>
+            />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && searchMusic()}
+              placeholder="Search songs, artists, albums..."
+              style={styles.searchInput}
+            />
           </div>
         </div>
 
-        {/* ==============================================================
-            LOADING INDICATOR
-            Shows animated dots while waiting for API response
-            ============================================================== */}
+        {/* Favorites Button */}
+        <button style={styles.favoritesButton}>
+          <FaRegHeart style={{ fontSize: "20px" }} />
+        </button>
+      </header>
+
+      {/* ================================================================
+          MAIN CONTENT
+          ================================================================ */}
+      <main style={styles.mainContent}>
+        {/* Loading Indicator */}
         {loading && (
-          <div className="flex justify-center items-center gap-2 mb-8">
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              gap: "8px",
+              padding: "40px",
+            }}
+          >
             <div
-              className="w-3 h-3 bg-indigo-400 rounded-full animate-bounce"
-              style={{ animationDelay: "0ms" }}
-            ></div>
+              style={{
+                width: "12px",
+                height: "12px",
+                background: "#818cf8",
+                borderRadius: "50%",
+                animation: "bounce 1s infinite",
+              }}
+            />
             <div
-              className="w-3 h-3 bg-purple-400 rounded-full animate-bounce"
-              style={{ animationDelay: "150ms" }}
-            ></div>
+              style={{
+                width: "12px",
+                height: "12px",
+                background: "#a78bfa",
+                borderRadius: "50%",
+                animation: "bounce 1s infinite 0.1s",
+              }}
+            />
             <div
-              className="w-3 h-3 bg-pink-400 rounded-full animate-bounce"
-              style={{ animationDelay: "300ms" }}
-            ></div>
+              style={{
+                width: "12px",
+                height: "12px",
+                background: "#ec4899",
+                borderRadius: "50%",
+                animation: "bounce 1s infinite 0.2s",
+              }}
+            />
           </div>
         )}
 
-        {/* ==============================================================
-            FAVORITES SECTION
-            Shows user's saved favorite tracks (only if they have any)
-            ============================================================== */}
-        {favorites.length > 0 && (
-          <section className="mb-12">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-              <FaHeart className="text-pink-400" />
-              <span className="text-indigo-200">Your Favorites</span>
-            </h2>
-            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
-              {favorites.map((track) => (
-                <div
-                  key={`fav-${track.id}`}
-                  onClick={() => playTrack(track)}
-                  className={`flex-shrink-0 w-40 cursor-pointer group ${
-                    currentTrack?.id === track.id
-                      ? "ring-2 ring-indigo-400 rounded-xl"
-                      : ""
-                  }`}
-                >
-                  <div className="relative overflow-hidden rounded-xl">
-                    <img
-                      src={track.album.cover_medium}
-                      alt={track.title}
-                      className="w-40 h-40 object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                      <div className="w-12 h-12 bg-indigo-500 rounded-full flex items-center justify-center">
-                        <FaPlay className="text-white ml-1" />
-                      </div>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-sm font-medium truncate">
-                    {track.title}
-                  </p>
-                  <p className="text-xs text-slate-400 truncate">
-                    {track.artist.name}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* ==============================================================
-            SEARCH RESULTS GRID
-            Displays the tracks returned from the Deezer API search
-            Uses CSS Grid for responsive layout (2-6 columns based on screen)
-            ============================================================== */}
+        {/* Search Results */}
         {tracks.length > 0 && (
-          <section>
-            <h2 className="text-2xl font-bold mb-6 text-slate-300">
-              Search Results
-            </h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
+          <div style={{ marginBottom: "32px" }}>
+            <p style={styles.sectionLabel}>SEARCH RESULTS</p>
+            <div style={styles.card}>
+              <div style={{ ...styles.cardHeader, marginBottom: "16px" }}>
+                <div
+                  style={{
+                    ...styles.iconCircle,
+                    background:
+                      "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
+                  }}
+                >
+                  <FaSearch style={{ fontSize: "20px", color: "white" }} />
+                </div>
+                <div>
+                  <h3 style={styles.cardTitle}>Search Results</h3>
+                  <p style={styles.cardSubtitle}>{tracks.length} songs</p>
+                </div>
+              </div>
               {tracks.map((track) => (
                 <div
                   key={track.id}
-                  className={`group relative bg-white/5 backdrop-blur-sm rounded-2xl overflow-hidden transition-all duration-300 hover:bg-white/10 hover:shadow-xl hover:shadow-indigo-500/10 ${
-                    currentTrack?.id === track.id
-                      ? "ring-2 ring-indigo-400 bg-indigo-500/10"
-                      : ""
-                  }`}
+                  style={{
+                    ...styles.trackItem,
+                    background:
+                      currentTrack?.id === track.id
+                        ? "rgba(139, 92, 246, 0.2)"
+                        : "transparent",
+                    paddingLeft: "12px",
+                    paddingRight: "12px",
+                  }}
+                  onClick={() => playTrack(track)}
+                  onMouseOver={(e) => {
+                    if (currentTrack?.id !== track.id) {
+                      e.currentTarget.style.background =
+                        "rgba(255,255,255,0.05)";
+                    }
+                  }}
+                  onMouseOut={(e) => {
+                    if (currentTrack?.id !== track.id) {
+                      e.currentTarget.style.background = "transparent";
+                    }
+                  }}
                 >
-                  {/* Album cover with play overlay */}
-                  <div
-                    className="relative cursor-pointer"
-                    onClick={() => playTrack(track)}
+                  <img
+                    src={track.album.cover_small}
+                    alt={track.title}
+                    style={styles.trackImage}
+                  />
+                  <div style={styles.trackInfo}>
+                    <p style={styles.trackTitle}>{track.title}</p>
+                    <p style={styles.trackArtist}>{track.artist.name}</p>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleFavorite(track);
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      cursor: "pointer",
+                      padding: "8px",
+                    }}
                   >
-                    <img
-                      src={track.album.cover_medium}
-                      alt={track.title}
-                      className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                    {/* Play button overlay - appears on hover */}
-                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                      <div className="w-14 h-14 bg-indigo-500 rounded-full flex items-center justify-center shadow-lg transform scale-75 group-hover:scale-100 transition-transform">
-                        {currentTrack?.id === track.id && isPlaying ? (
-                          <FaPause className="text-white text-xl" />
-                        ) : (
-                          <FaPlay className="text-white text-xl ml-1" />
-                        )}
-                      </div>
-                    </div>
-                    {/* Currently playing indicator */}
-                    {currentTrack?.id === track.id && isPlaying && (
-                      <div className="absolute bottom-2 left-2 flex gap-1">
-                        <div className="w-1 h-4 bg-indigo-400 rounded animate-pulse"></div>
-                        <div
-                          className="w-1 h-4 bg-indigo-400 rounded animate-pulse"
-                          style={{ animationDelay: "150ms" }}
-                        ></div>
-                        <div
-                          className="w-1 h-4 bg-indigo-400 rounded animate-pulse"
-                          style={{ animationDelay: "300ms" }}
-                        ></div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Track info and favorite button */}
-                  <div className="p-4">
-                    <div className="flex justify-between items-start gap-2">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-sm truncate">
-                          {track.title}
-                        </h3>
-                        <p className="text-xs text-slate-400 truncate mt-1">
-                          {track.artist.name}
-                        </p>
-                      </div>
-                      {/* Favorite/Like button */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation(); // Prevent triggering play
-                          toggleFavorite(track);
+                    {isFavorite(track.id) ? (
+                      <FaHeart style={{ fontSize: "18px", color: "#ec4899" }} />
+                    ) : (
+                      <FaRegHeart
+                        style={{
+                          fontSize: "18px",
+                          color: "rgba(255,255,255,0.4)",
                         }}
-                        className="p-2 hover:bg-white/10 rounded-full transition-colors"
-                      >
-                        {isFavorite(track.id) ? (
-                          <FaHeart className="text-pink-400 text-lg" />
-                        ) : (
-                          <FaRegHeart className="text-slate-400 hover:text-pink-400 text-lg transition-colors" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
+                      />
+                    )}
+                  </button>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
         )}
 
-        {/* ==============================================================
-            EMPTY STATE
-            Shows helpful message when search returns no results
-            ============================================================== */}
-        {!loading && tracks.length === 0 && !query && (
-          <div className="text-center py-20">
-            <div
-              className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 opacity-30"
-              style={{
-                background: "linear-gradient(135deg, #818cf8 0%, #a78bfa 100%)",
-              }}
-            >
-              <IoMusicalNote className="text-4xl text-white" />
+        {/* PLAYLISTS Section Label */}
+        {!loading && tracks.length === 0 && (
+          <>
+            <p style={styles.sectionLabel}>PLAYLISTS</p>
+
+            {/* Favorites Card */}
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <div
+                  style={{
+                    ...styles.iconCircle,
+                    background:
+                      "linear-gradient(135deg, #ec4899 0%, #f472b6 100%)",
+                  }}
+                >
+                  <FaHeart style={{ fontSize: "20px", color: "white" }} />
+                </div>
+                <div>
+                  <h3 style={styles.cardTitle}>Favorites</h3>
+                  <p style={styles.cardSubtitle}>{favorites.length} songs</p>
+                </div>
+              </div>
+              {/* Show favorite tracks if any */}
+              {favorites.length > 0 && (
+                <div style={{ marginTop: "16px" }}>
+                  {favorites.slice(0, 3).map((track) => (
+                    <div
+                      key={`fav-${track.id}`}
+                      style={{
+                        ...styles.trackItem,
+                        paddingLeft: "12px",
+                        paddingRight: "12px",
+                      }}
+                      onClick={() => playTrack(track)}
+                      onMouseOver={(e) =>
+                        (e.currentTarget.style.background =
+                          "rgba(255,255,255,0.05)")
+                      }
+                      onMouseOut={(e) =>
+                        (e.currentTarget.style.background = "transparent")
+                      }
+                    >
+                      <img
+                        src={track.album.cover_small}
+                        alt={track.title}
+                        style={styles.trackImage}
+                      />
+                      <div style={styles.trackInfo}>
+                        <p style={styles.trackTitle}>{track.title}</p>
+                        <p style={styles.trackArtist}>{track.artist.name}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-            <h3 className="text-2xl font-bold text-slate-400 mb-2">
-              Start by searching for music
-            </h3>
-            <p className="text-slate-500">
-              Search for your favorite songs, artists, or albums
-            </p>
-          </div>
-        )}
 
-        {!loading && tracks.length === 0 && query && (
-          <div className="text-center py-20">
-            <p className="text-xl text-slate-400">
-              No results found for "{query}". Try something else!
-            </p>
-          </div>
+            {/* Recently Played Card */}
+            <div style={styles.card}>
+              <div
+                style={{
+                  ...styles.cardHeader,
+                  marginBottom: recentlyPlayed.length > 0 ? "16px" : "0",
+                }}
+              >
+                <div
+                  style={{
+                    ...styles.iconCircle,
+                    background:
+                      "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 style={styles.cardTitle}>Recently Played</h3>
+                  <p style={styles.cardSubtitle}>
+                    {recentlyPlayed.length} songs
+                  </p>
+                </div>
+              </div>
+              {recentlyPlayed.length > 0 ? (
+                recentlyPlayed.slice(0, 3).map((track) => (
+                  <div
+                    key={`recent-${track.id}`}
+                    style={{
+                      ...styles.trackItem,
+                      paddingLeft: "12px",
+                      paddingRight: "12px",
+                    }}
+                    onClick={() => playTrack(track)}
+                    onMouseOver={(e) =>
+                      (e.currentTarget.style.background =
+                        "rgba(255,255,255,0.05)")
+                    }
+                    onMouseOut={(e) =>
+                      (e.currentTarget.style.background = "transparent")
+                    }
+                  >
+                    <img
+                      src={track.album.cover_small}
+                      alt={track.title}
+                      style={styles.trackImage}
+                    />
+                    <div style={styles.trackInfo}>
+                      <p style={styles.trackTitle}>{track.title}</p>
+                      <p style={styles.trackArtist}>{track.artist.name}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p
+                  style={{
+                    color: "rgba(255,255,255,0.3)",
+                    fontSize: "14px",
+                    marginTop: "12px",
+                  }}
+                >
+                  Play some music to see your history here
+                </p>
+              )}
+            </div>
+
+            {/* Trending Now Card */}
+            <div style={styles.card}>
+              <div
+                style={{
+                  ...styles.cardHeader,
+                  marginBottom: trendingTracks.length > 0 ? "16px" : "0",
+                }}
+              >
+                <div
+                  style={{
+                    ...styles.iconCircle,
+                    background:
+                      "linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)",
+                  }}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 style={styles.cardTitle}>Trending Now</h3>
+                  <p style={styles.cardSubtitle}>
+                    {trendingTracks.length} songs
+                  </p>
+                </div>
+              </div>
+              {trendingTracks.length > 0 ? (
+                trendingTracks.slice(0, 3).map((track) => (
+                  <div
+                    key={`trending-${track.id}`}
+                    style={{
+                      ...styles.trackItem,
+                      paddingLeft: "12px",
+                      paddingRight: "12px",
+                    }}
+                    onClick={() => playTrack(track)}
+                    onMouseOver={(e) =>
+                      (e.currentTarget.style.background =
+                        "rgba(255,255,255,0.05)")
+                    }
+                    onMouseOut={(e) =>
+                      (e.currentTarget.style.background = "transparent")
+                    }
+                  >
+                    <img
+                      src={track.album.cover_small}
+                      alt={track.title}
+                      style={styles.trackImage}
+                    />
+                    <div style={styles.trackInfo}>
+                      <p style={styles.trackTitle}>{track.title}</p>
+                      <p style={styles.trackArtist}>{track.artist.name}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p
+                  style={{
+                    color: "rgba(255,255,255,0.3)",
+                    fontSize: "14px",
+                    marginTop: "12px",
+                  }}
+                >
+                  Loading trending tracks...
+                </p>
+              )}
+            </div>
+          </>
         )}
-      </div>
+      </main>
 
       {/* ================================================================
           NOW PLAYING BAR
-          Fixed bottom bar showing current track with full playback controls
-          Only visible when a track is selected
+          Fixed bottom bar showing current track with playback controls
           ================================================================ */}
       {currentTrack && (
-        <div className="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-xl border-t border-white/10 shadow-2xl">
-          {/* Progress bar - clickable to seek */}
+        <div
+          style={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            background: "rgba(15, 10, 30, 0.95)",
+            backdropFilter: "blur(20px)",
+            borderTop: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          {/* Progress bar */}
           <div
-            className="h-1 bg-slate-800 cursor-pointer group"
+            style={{
+              height: "4px",
+              background: "rgba(255,255,255,0.1)",
+              cursor: "pointer",
+            }}
             onClick={handleProgressClick}
           >
             <div
-              className="h-full relative"
               style={{
+                height: "100%",
                 width: `${progress}%`,
-                background: "linear-gradient(90deg, #818cf8 0%, #a78bfa 100%)",
+                background: "linear-gradient(90deg, #ec4899 0%, #8b5cf6 100%)",
+                borderRadius: "2px",
               }}
-            >
-              {/* Seek handle - visible on hover */}
-              <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"></div>
-            </div>
+            />
           </div>
 
-          {/* Player controls container */}
-          <div className="container mx-auto px-4 py-3">
-            <div className="flex items-center gap-4">
-              {/* Current track info (left side) */}
-              <div className="flex items-center gap-4 flex-1 min-w-0">
-                <img
-                  src={currentTrack.album.cover_small}
-                  alt={currentTrack.title}
-                  className="w-14 h-14 rounded-lg shadow-lg"
-                />
-                <div className="min-w-0">
-                  <h4 className="font-bold truncate">{currentTrack.title}</h4>
-                  <p className="text-sm text-slate-400 truncate">
-                    {currentTrack.artist.name}
-                  </p>
-                </div>
-                {/* Favorite button in now playing bar */}
-                <button
-                  onClick={() => toggleFavorite(currentTrack)}
-                  className="p-2 hover:bg-white/10 rounded-full transition-colors hidden sm:block"
-                >
-                  {isFavorite(currentTrack.id) ? (
-                    <FaHeart className="text-pink-400 text-xl" />
-                  ) : (
-                    <FaRegHeart className="text-slate-400 hover:text-pink-400 text-xl transition-colors" />
-                  )}
-                </button>
-              </div>
-
-              {/* Playback controls (center) */}
-              <div className="flex items-center gap-4">
-                {/* Previous track button */}
-                <button
-                  onClick={playPrevious}
-                  className="p-3 hover:bg-white/10 rounded-full transition-colors text-slate-300 hover:text-white"
-                >
-                  <FaStepBackward className="text-xl" />
-                </button>
-                {/* Play/Pause button */}
-                <button
-                  onClick={togglePlayPause}
-                  className="w-14 h-14 rounded-full flex items-center justify-center shadow-lg shadow-indigo-500/30 hover:scale-105 transition-transform"
+          {/* Controls */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              padding: "12px 32px",
+              gap: "20px",
+            }}
+          >
+            {/* Track info */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "14px",
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              <img
+                src={currentTrack.album.cover_small}
+                alt={currentTrack.title}
+                style={{ width: "56px", height: "56px", borderRadius: "8px" }}
+              />
+              <div style={{ minWidth: 0 }}>
+                <p
                   style={{
-                    background:
-                      "linear-gradient(135deg, #818cf8 0%, #a78bfa 100%)",
+                    fontSize: "15px",
+                    fontWeight: 500,
+                    color: "white",
+                    margin: 0,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  {isPlaying ? (
-                    <FaPause className="text-xl" />
-                  ) : (
-                    <FaPlay className="text-xl ml-1" />
-                  )}
-                </button>
-                {/* Next track button */}
-                <button
-                  onClick={playNext}
-                  className="p-3 hover:bg-white/10 rounded-full transition-colors text-slate-300 hover:text-white"
+                  {currentTrack.title}
+                </p>
+                <p
+                  style={{
+                    fontSize: "13px",
+                    color: "rgba(255,255,255,0.5)",
+                    margin: "2px 0 0 0",
+                  }}
                 >
-                  <FaStepForward className="text-xl" />
-                </button>
+                  {currentTrack.artist.name}
+                </p>
               </div>
+              <button
+                onClick={() => toggleFavorite(currentTrack)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "8px",
+                }}
+              >
+                {isFavorite(currentTrack.id) ? (
+                  <FaHeart style={{ fontSize: "20px", color: "#ec4899" }} />
+                ) : (
+                  <FaRegHeart
+                    style={{ fontSize: "20px", color: "rgba(255,255,255,0.5)" }}
+                  />
+                )}
+              </button>
+            </div>
 
-              {/* Volume control (right side) - hidden on mobile */}
-              <div className="hidden md:flex items-center gap-3 flex-1 justify-end">
-                {/* Time display */}
-                <span className="text-sm text-slate-400 min-w-[80px] text-right">
-                  {formatTime(audioRef.current?.currentTime)} /{" "}
-                  {formatTime(audioRef.current?.duration)}
-                </span>
-                {/* Mute button */}
-                <button
-                  onClick={() => setIsMuted(!isMuted)}
-                  className="p-2 hover:bg-white/10 rounded-full transition-colors"
-                >
-                  {isMuted ? (
-                    <FaVolumeMute className="text-slate-400" />
-                  ) : (
-                    <FaVolumeUp className="text-slate-400" />
-                  )}
-                </button>
-                {/* Volume slider */}
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  value={isMuted ? 0 : volume}
-                  onChange={(e) => {
-                    setVolume(parseFloat(e.target.value));
-                    setIsMuted(false);
-                  }}
-                  className="w-24 accent-indigo-400"
-                />
-              </div>
+            {/* Playback controls */}
+            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+              <button
+                onClick={playPrevious}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "8px",
+                  color: "rgba(255,255,255,0.7)",
+                }}
+              >
+                <FaStepBackward style={{ fontSize: "18px" }} />
+              </button>
+              <button
+                onClick={togglePlayPause}
+                style={{
+                  width: "52px",
+                  height: "52px",
+                  borderRadius: "50%",
+                  border: "none",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background:
+                    "linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)",
+                }}
+              >
+                {isPlaying ? (
+                  <FaPause style={{ fontSize: "18px", color: "white" }} />
+                ) : (
+                  <FaPlay
+                    style={{
+                      fontSize: "18px",
+                      color: "white",
+                      marginLeft: "3px",
+                    }}
+                  />
+                )}
+              </button>
+              <button
+                onClick={playNext}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "8px",
+                  color: "rgba(255,255,255,0.7)",
+                }}
+              >
+                <FaStepForward style={{ fontSize: "18px" }} />
+              </button>
+            </div>
+
+            {/* Volume control */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                flex: 1,
+                justifyContent: "flex-end",
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "13px",
+                  color: "rgba(255,255,255,0.5)",
+                  minWidth: "80px",
+                  textAlign: "right",
+                }}
+              >
+                {formatTime(audioRef.current?.currentTime)} /{" "}
+                {formatTime(audioRef.current?.duration)}
+              </span>
+              <button
+                onClick={() => setIsMuted(!isMuted)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  padding: "8px",
+                  color: "rgba(255,255,255,0.5)",
+                }}
+              >
+                {isMuted ? (
+                  <FaVolumeMute style={{ fontSize: "18px" }} />
+                ) : (
+                  <FaVolumeUp style={{ fontSize: "18px" }} />
+                )}
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="1"
+                step="0.01"
+                value={isMuted ? 0 : volume}
+                onChange={(e) => {
+                  setVolume(parseFloat(e.target.value));
+                  setIsMuted(false);
+                }}
+                style={{ width: "100px" }}
+              />
             </div>
           </div>
         </div>
