@@ -141,6 +141,43 @@ body {
   animation: fadeIn 0.6s ease-out forwards;
 }
 
+/* Pulse animation for playing indicator */
+@keyframes pulse {
+  0% {
+    transform: scaleY(0.5);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+/* Responsive layout */
+@media (max-width: 1200px) {
+  /* Hide right sidebar on smaller screens when playing */
+  .now-playing-sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    border-left: none;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    background: rgba(15, 10, 30, 0.98);
+    backdrop-filter: blur(20px);
+  }
+}
+
+@media (max-width: 768px) {
+  /* Stack layout on mobile */
+  .main-grid {
+    grid-template-columns: 1fr !important;
+  }
+  
+  .left-sidebar {
+    display: none;
+  }
+}
+
 /* ============================================================================
    INPUT STYLES
    Custom styling for form inputs (range sliders, etc.)

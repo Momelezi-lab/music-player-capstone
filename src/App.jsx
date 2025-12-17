@@ -570,150 +570,24 @@ function App() {
   }
 
   // ============================================================================
-  // MAIN MUSIC PLAYER
-  // The full music player interface shown after clicking "Enter"
-  // Using inline styles for guaranteed compatibility
+  // MAIN MUSIC PLAYER - 3 Column Layout
+  // Left: Playlists | Center: All Songs | Right: Now Playing
   // ============================================================================
 
-  // Styles object for cleaner code
-  const styles = {
-    container: {
-      minHeight: "100vh",
-      background:
-        "linear-gradient(135deg, #0f0a1e 0%, #1a1040 30%, #2d1b4e 60%, #1a1040 100%)",
-      color: "white",
-      fontFamily: "'Outfit', system-ui, sans-serif",
-      paddingBottom: currentTrack ? "100px" : "0",
-    },
-    header: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      padding: "20px 32px",
-      borderBottom: "1px solid rgba(255,255,255,0.05)",
-    },
-    logoSection: {
-      display: "flex",
-      alignItems: "center",
-      gap: "12px",
-    },
-    logoIcon: {
-      width: "48px",
-      height: "48px",
-      borderRadius: "14px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)",
-    },
-    logoText: {
-      fontSize: "24px",
-      fontWeight: 500,
-      color: "white",
-    },
-    searchBar: {
-      flex: 1,
-      maxWidth: "500px",
-      margin: "0 32px",
-    },
-    searchInput: {
-      width: "100%",
-      padding: "14px 20px 14px 48px",
-      borderRadius: "30px",
-      border: "1px solid rgba(255,255,255,0.1)",
-      background: "rgba(255,255,255,0.05)",
-      color: "white",
-      fontSize: "15px",
-      outline: "none",
-      fontFamily: "'Outfit', system-ui, sans-serif",
-    },
-    favoritesButton: {
-      width: "48px",
-      height: "48px",
-      borderRadius: "50%",
-      border: "1px solid rgba(255,255,255,0.1)",
-      background: "transparent",
-      color: "white",
-      cursor: "pointer",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    mainContent: {
-      padding: "32px",
-    },
-    sectionLabel: {
-      fontSize: "13px",
-      fontWeight: 500,
-      color: "rgba(255,255,255,0.5)",
-      letterSpacing: "1px",
-      marginBottom: "20px",
-    },
-    card: {
-      background: "rgba(255,255,255,0.03)",
-      border: "1px solid rgba(255,255,255,0.08)",
-      borderRadius: "16px",
-      padding: "20px",
-      marginBottom: "16px",
-    },
-    cardHeader: {
-      display: "flex",
-      alignItems: "center",
-      gap: "16px",
-    },
-    iconCircle: {
-      width: "48px",
-      height: "48px",
-      borderRadius: "14px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    cardTitle: {
-      fontSize: "18px",
-      fontWeight: 600,
-      color: "white",
-      margin: 0,
-    },
-    cardSubtitle: {
-      fontSize: "14px",
-      color: "rgba(255,255,255,0.5)",
-      margin: "4px 0 0 0",
-    },
-    trackItem: {
-      display: "flex",
-      alignItems: "center",
-      gap: "14px",
-      padding: "12px 0",
-      cursor: "pointer",
-      borderRadius: "8px",
-      transition: "background 0.2s",
-    },
-    trackImage: {
-      width: "48px",
-      height: "48px",
-      borderRadius: "8px",
-      objectFit: "cover",
-    },
-    trackInfo: {
-      flex: 1,
-    },
-    trackTitle: {
-      fontSize: "15px",
-      fontWeight: 500,
-      color: "white",
-      margin: 0,
-    },
-    trackArtist: {
-      fontSize: "13px",
-      color: "rgba(255,255,255,0.5)",
-      margin: "2px 0 0 0",
-    },
-  };
+  // Get all songs to display (search results or trending)
+  const displayTracks = tracks.length > 0 ? tracks : trendingTracks;
 
   return (
-    <div style={styles.container}>
-      {/* Hidden audio element for playback */}
+    <div
+      style={{
+        minHeight: "100vh",
+        background:
+          "linear-gradient(135deg, #0f0a1e 0%, #1a1040 30%, #2d1b4e 60%, #1a1040 100%)",
+        color: "white",
+        fontFamily: "'Outfit', system-ui, sans-serif",
+      }}
+    >
+      {/* Hidden audio element */}
       {currentTrack && (
         <audio
           ref={audioRef}
@@ -726,28 +600,43 @@ function App() {
       )}
 
       {/* ================================================================
-          HEADER - Logo, Search Bar, Favorites Button
+          HEADER
           ================================================================ */}
-      <header style={styles.header}>
-        {/* Logo Section */}
-        <div style={styles.logoSection}>
-          <div style={styles.logoIcon}>
-            <IoMusicalNote style={{ fontSize: "24px", color: "white" }} />
+      <header
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "16px 24px",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div
+            style={{
+              width: "44px",
+              height: "44px",
+              borderRadius: "12px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              background: "linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)",
+            }}
+          >
+            <IoMusicalNote style={{ fontSize: "22px", color: "white" }} />
           </div>
-          <span style={styles.logoText}>NovaBeat</span>
+          <span style={{ fontSize: "22px", fontWeight: 500 }}>NovaBeat</span>
         </div>
 
-        {/* Search Bar */}
-        <div style={styles.searchBar}>
+        <div style={{ flex: 1, maxWidth: "500px", margin: "0 24px" }}>
           <div style={{ position: "relative" }}>
             <FaSearch
               style={{
                 position: "absolute",
-                left: "18px",
+                left: "16px",
                 top: "50%",
                 transform: "translateY(-50%)",
                 color: "rgba(255,255,255,0.4)",
-                fontSize: "16px",
               }}
             />
             <input
@@ -756,461 +645,671 @@ function App() {
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && searchMusic()}
               placeholder="Search songs, artists, albums..."
-              style={styles.searchInput}
+              style={{
+                width: "100%",
+                padding: "12px 16px 12px 44px",
+                borderRadius: "25px",
+                border: "1px solid rgba(255,255,255,0.1)",
+                background: "rgba(255,255,255,0.05)",
+                color: "white",
+                fontSize: "14px",
+                outline: "none",
+                fontFamily: "'Outfit', system-ui, sans-serif",
+              }}
             />
           </div>
         </div>
 
-        {/* Favorites Button */}
-        <button style={styles.favoritesButton}>
-          <FaRegHeart style={{ fontSize: "20px" }} />
+        <button
+          style={{
+            width: "44px",
+            height: "44px",
+            borderRadius: "50%",
+            border: "1px solid rgba(255,255,255,0.1)",
+            background: "transparent",
+            color: "white",
+            cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <FaRegHeart style={{ fontSize: "18px" }} />
         </button>
       </header>
 
       {/* ================================================================
-          MAIN CONTENT
+          MAIN 3-COLUMN LAYOUT
           ================================================================ */}
-      <main style={styles.mainContent}>
-        {/* Loading Indicator */}
-        {loading && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "center",
-              gap: "8px",
-              padding: "40px",
-            }}
-          >
-            <div
-              style={{
-                width: "12px",
-                height: "12px",
-                background: "#818cf8",
-                borderRadius: "50%",
-                animation: "bounce 1s infinite",
-              }}
-            />
-            <div
-              style={{
-                width: "12px",
-                height: "12px",
-                background: "#a78bfa",
-                borderRadius: "50%",
-                animation: "bounce 1s infinite 0.1s",
-              }}
-            />
-            <div
-              style={{
-                width: "12px",
-                height: "12px",
-                background: "#ec4899",
-                borderRadius: "50%",
-                animation: "bounce 1s infinite 0.2s",
-              }}
-            />
-          </div>
-        )}
-
-        {/* Search Results */}
-        {tracks.length > 0 && (
-          <div style={{ marginBottom: "32px" }}>
-            <p style={styles.sectionLabel}>SEARCH RESULTS</p>
-            <div style={styles.card}>
-              <div style={{ ...styles.cardHeader, marginBottom: "16px" }}>
-                <div
-                  style={{
-                    ...styles.iconCircle,
-                    background:
-                      "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
-                  }}
-                >
-                  <FaSearch style={{ fontSize: "20px", color: "white" }} />
-                </div>
-                <div>
-                  <h3 style={styles.cardTitle}>Search Results</h3>
-                  <p style={styles.cardSubtitle}>{tracks.length} songs</p>
-                </div>
-              </div>
-              {tracks.map((track) => (
-                <div
-                  key={track.id}
-                  style={{
-                    ...styles.trackItem,
-                    background:
-                      currentTrack?.id === track.id
-                        ? "rgba(139, 92, 246, 0.2)"
-                        : "transparent",
-                    paddingLeft: "12px",
-                    paddingRight: "12px",
-                  }}
-                  onClick={() => playTrack(track)}
-                  onMouseOver={(e) => {
-                    if (currentTrack?.id !== track.id) {
-                      e.currentTarget.style.background =
-                        "rgba(255,255,255,0.05)";
-                    }
-                  }}
-                  onMouseOut={(e) => {
-                    if (currentTrack?.id !== track.id) {
-                      e.currentTarget.style.background = "transparent";
-                    }
-                  }}
-                >
-                  <img
-                    src={track.album.cover_small}
-                    alt={track.title}
-                    style={styles.trackImage}
-                  />
-                  <div style={styles.trackInfo}>
-                    <p style={styles.trackTitle}>{track.title}</p>
-                    <p style={styles.trackArtist}>{track.artist.name}</p>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(track);
-                    }}
-                    style={{
-                      background: "none",
-                      border: "none",
-                      cursor: "pointer",
-                      padding: "8px",
-                    }}
-                  >
-                    {isFavorite(track.id) ? (
-                      <FaHeart style={{ fontSize: "18px", color: "#ec4899" }} />
-                    ) : (
-                      <FaRegHeart
-                        style={{
-                          fontSize: "18px",
-                          color: "rgba(255,255,255,0.4)",
-                        }}
-                      />
-                    )}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* PLAYLISTS Section Label */}
-        {!loading && tracks.length === 0 && (
-          <>
-            <p style={styles.sectionLabel}>PLAYLISTS</p>
-
-            {/* Favorites Card */}
-            <div style={styles.card}>
-              <div style={styles.cardHeader}>
-                <div
-                  style={{
-                    ...styles.iconCircle,
-                    background:
-                      "linear-gradient(135deg, #ec4899 0%, #f472b6 100%)",
-                  }}
-                >
-                  <FaHeart style={{ fontSize: "20px", color: "white" }} />
-                </div>
-                <div>
-                  <h3 style={styles.cardTitle}>Favorites</h3>
-                  <p style={styles.cardSubtitle}>{favorites.length} songs</p>
-                </div>
-              </div>
-              {/* Show favorite tracks if any */}
-              {favorites.length > 0 && (
-                <div style={{ marginTop: "16px" }}>
-                  {favorites.slice(0, 3).map((track) => (
-                    <div
-                      key={`fav-${track.id}`}
-                      style={{
-                        ...styles.trackItem,
-                        paddingLeft: "12px",
-                        paddingRight: "12px",
-                      }}
-                      onClick={() => playTrack(track)}
-                      onMouseOver={(e) =>
-                        (e.currentTarget.style.background =
-                          "rgba(255,255,255,0.05)")
-                      }
-                      onMouseOut={(e) =>
-                        (e.currentTarget.style.background = "transparent")
-                      }
-                    >
-                      <img
-                        src={track.album.cover_small}
-                        alt={track.title}
-                        style={styles.trackImage}
-                      />
-                      <div style={styles.trackInfo}>
-                        <p style={styles.trackTitle}>{track.title}</p>
-                        <p style={styles.trackArtist}>{track.artist.name}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* Recently Played Card */}
-            <div style={styles.card}>
-              <div
-                style={{
-                  ...styles.cardHeader,
-                  marginBottom: recentlyPlayed.length > 0 ? "16px" : "0",
-                }}
-              >
-                <div
-                  style={{
-                    ...styles.iconCircle,
-                    background:
-                      "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 style={styles.cardTitle}>Recently Played</h3>
-                  <p style={styles.cardSubtitle}>
-                    {recentlyPlayed.length} songs
-                  </p>
-                </div>
-              </div>
-              {recentlyPlayed.length > 0 ? (
-                recentlyPlayed.slice(0, 3).map((track) => (
-                  <div
-                    key={`recent-${track.id}`}
-                    style={{
-                      ...styles.trackItem,
-                      paddingLeft: "12px",
-                      paddingRight: "12px",
-                    }}
-                    onClick={() => playTrack(track)}
-                    onMouseOver={(e) =>
-                      (e.currentTarget.style.background =
-                        "rgba(255,255,255,0.05)")
-                    }
-                    onMouseOut={(e) =>
-                      (e.currentTarget.style.background = "transparent")
-                    }
-                  >
-                    <img
-                      src={track.album.cover_small}
-                      alt={track.title}
-                      style={styles.trackImage}
-                    />
-                    <div style={styles.trackInfo}>
-                      <p style={styles.trackTitle}>{track.title}</p>
-                      <p style={styles.trackArtist}>{track.artist.name}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p
-                  style={{
-                    color: "rgba(255,255,255,0.3)",
-                    fontSize: "14px",
-                    marginTop: "12px",
-                  }}
-                >
-                  Play some music to see your history here
-                </p>
-              )}
-            </div>
-
-            {/* Trending Now Card */}
-            <div style={styles.card}>
-              <div
-                style={{
-                  ...styles.cardHeader,
-                  marginBottom: trendingTracks.length > 0 ? "16px" : "0",
-                }}
-              >
-                <div
-                  style={{
-                    ...styles.iconCircle,
-                    background:
-                      "linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)",
-                  }}
-                >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                    <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" />
-                  </svg>
-                </div>
-                <div>
-                  <h3 style={styles.cardTitle}>Trending Now</h3>
-                  <p style={styles.cardSubtitle}>
-                    {trendingTracks.length} songs
-                  </p>
-                </div>
-              </div>
-              {trendingTracks.length > 0 ? (
-                trendingTracks.slice(0, 3).map((track) => (
-                  <div
-                    key={`trending-${track.id}`}
-                    style={{
-                      ...styles.trackItem,
-                      paddingLeft: "12px",
-                      paddingRight: "12px",
-                    }}
-                    onClick={() => playTrack(track)}
-                    onMouseOver={(e) =>
-                      (e.currentTarget.style.background =
-                        "rgba(255,255,255,0.05)")
-                    }
-                    onMouseOut={(e) =>
-                      (e.currentTarget.style.background = "transparent")
-                    }
-                  >
-                    <img
-                      src={track.album.cover_small}
-                      alt={track.title}
-                      style={styles.trackImage}
-                    />
-                    <div style={styles.trackInfo}>
-                      <p style={styles.trackTitle}>{track.title}</p>
-                      <p style={styles.trackArtist}>{track.artist.name}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p
-                  style={{
-                    color: "rgba(255,255,255,0.3)",
-                    fontSize: "14px",
-                    marginTop: "12px",
-                  }}
-                >
-                  Loading trending tracks...
-                </p>
-              )}
-            </div>
-          </>
-        )}
-      </main>
-
-      {/* ================================================================
-          NOW PLAYING BAR
-          Fixed bottom bar showing current track with playback controls
-          ================================================================ */}
-      {currentTrack && (
-        <div
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: currentTrack ? "280px 1fr 300px" : "280px 1fr",
+          minHeight: "calc(100vh - 77px)",
+        }}
+      >
+        {/* ============================================================
+            LEFT SIDEBAR - Playlists
+            ============================================================ */}
+        <aside
           style={{
-            position: "fixed",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            background: "rgba(15, 10, 30, 0.95)",
-            backdropFilter: "blur(20px)",
-            borderTop: "1px solid rgba(255,255,255,0.1)",
+            padding: "24px 16px",
+            borderRight: "1px solid rgba(255,255,255,0.05)",
+            overflowY: "auto",
           }}
         >
-          {/* Progress bar */}
+          <p
+            style={{
+              fontSize: "12px",
+              fontWeight: 500,
+              color: "rgba(255,255,255,0.4)",
+              letterSpacing: "1px",
+              marginBottom: "16px",
+            }}
+          >
+            PLAYLISTS
+          </p>
+
+          {/* Favorites Card */}
           <div
             style={{
-              height: "4px",
-              background: "rgba(255,255,255,0.1)",
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "12px",
+              padding: "16px",
+              marginBottom: "12px",
               cursor: "pointer",
             }}
-            onClick={handleProgressClick}
           >
-            <div
-              style={{
-                height: "100%",
-                width: `${progress}%`,
-                background: "linear-gradient(90deg, #ec4899 0%, #8b5cf6 100%)",
-                borderRadius: "2px",
-              }}
-            />
-          </div>
-
-          {/* Controls */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              padding: "12px 32px",
-              gap: "20px",
-            }}
-          >
-            {/* Track info */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "14px",
-                flex: 1,
-                minWidth: 0,
-              }}
-            >
-              <img
-                src={currentTrack.album.cover_small}
-                alt={currentTrack.title}
-                style={{ width: "56px", height: "56px", borderRadius: "8px" }}
-              />
-              <div style={{ minWidth: 0 }}>
-                <p
-                  style={{
-                    fontSize: "15px",
-                    fontWeight: 500,
-                    color: "white",
-                    margin: 0,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {currentTrack.title}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background:
+                    "linear-gradient(135deg, #ec4899 0%, #f472b6 100%)",
+                }}
+              >
+                <FaHeart style={{ fontSize: "16px", color: "white" }} />
+              </div>
+              <div>
+                <p style={{ fontSize: "15px", fontWeight: 500, margin: 0 }}>
+                  Favorites
                 </p>
                 <p
                   style={{
-                    fontSize: "13px",
+                    fontSize: "12px",
                     color: "rgba(255,255,255,0.5)",
                     margin: "2px 0 0 0",
                   }}
                 >
-                  {currentTrack.artist.name}
+                  {favorites.length} songs
                 </p>
               </div>
-              <button
-                onClick={() => toggleFavorite(currentTrack)}
+            </div>
+          </div>
+
+          {/* Recently Played Card */}
+          <div
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "12px",
+              padding: "16px",
+              marginBottom: "12px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: recentlyPlayed.length > 0 ? "12px" : "0",
+              }}
+            >
+              <div
                 style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  padding: "8px",
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background:
+                    "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)",
                 }}
               >
-                {isFavorite(currentTrack.id) ? (
-                  <FaHeart style={{ fontSize: "20px", color: "#ec4899" }} />
-                ) : (
-                  <FaRegHeart
-                    style={{ fontSize: "20px", color: "rgba(255,255,255,0.5)" }}
-                  />
-                )}
-              </button>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                  <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z" />
+                </svg>
+              </div>
+              <div>
+                <p style={{ fontSize: "15px", fontWeight: 500, margin: 0 }}>
+                  Recently Played
+                </p>
+                <p
+                  style={{
+                    fontSize: "12px",
+                    color: "rgba(255,255,255,0.5)",
+                    margin: "2px 0 0 0",
+                  }}
+                >
+                  {recentlyPlayed.length} songs
+                </p>
+              </div>
+            </div>
+            {recentlyPlayed.slice(0, 3).map((track) => (
+              <div
+                key={`recent-${track.id}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "8px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  marginTop: "4px",
+                }}
+                onClick={() => playTrack(track)}
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
+              >
+                <img
+                  src={track.album.cover_small}
+                  alt={track.title}
+                  style={{ width: "36px", height: "36px", borderRadius: "6px" }}
+                />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 500,
+                      margin: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {track.title}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "11px",
+                      color: "rgba(255,255,255,0.5)",
+                      margin: 0,
+                    }}
+                  >
+                    {track.artist.name}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Trending Now Card */}
+          <div
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "12px",
+              padding: "16px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: trendingTracks.length > 0 ? "12px" : "0",
+              }}
+            >
+              <div
+                style={{
+                  width: "40px",
+                  height: "40px",
+                  borderRadius: "10px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  background:
+                    "linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)",
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                  <path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z" />
+                </svg>
+              </div>
+              <div>
+                <p style={{ fontSize: "15px", fontWeight: 500, margin: 0 }}>
+                  Trending Now
+                </p>
+                <p
+                  style={{
+                    fontSize: "12px",
+                    color: "rgba(255,255,255,0.5)",
+                    margin: "2px 0 0 0",
+                  }}
+                >
+                  {trendingTracks.length} songs
+                </p>
+              </div>
+            </div>
+            {trendingTracks.slice(0, 3).map((track) => (
+              <div
+                key={`trending-${track.id}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "8px",
+                  borderRadius: "8px",
+                  cursor: "pointer",
+                  marginTop: "4px",
+                }}
+                onClick={() => playTrack(track)}
+                onMouseOver={(e) =>
+                  (e.currentTarget.style.background = "rgba(255,255,255,0.05)")
+                }
+                onMouseOut={(e) =>
+                  (e.currentTarget.style.background = "transparent")
+                }
+              >
+                <img
+                  src={track.album.cover_small}
+                  alt={track.title}
+                  style={{ width: "36px", height: "36px", borderRadius: "6px" }}
+                />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p
+                    style={{
+                      fontSize: "13px",
+                      fontWeight: 500,
+                      margin: 0,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {track.title}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "11px",
+                      color: "rgba(255,255,255,0.5)",
+                      margin: 0,
+                    }}
+                  >
+                    {track.artist.name}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </aside>
+
+        {/* ============================================================
+            CENTER - All Songs List
+            ============================================================ */}
+        <main style={{ padding: "24px", overflowY: "auto" }}>
+          <div
+            style={{
+              background: "rgba(255,255,255,0.03)",
+              border: "1px solid rgba(255,255,255,0.08)",
+              borderRadius: "16px",
+              padding: "20px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                marginBottom: "20px",
+              }}
+            >
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="rgba(255,255,255,0.6)"
+              >
+                <path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z" />
+              </svg>
+              <h2 style={{ fontSize: "20px", fontWeight: 600, margin: 0 }}>
+                {tracks.length > 0 ? "Search Results" : "All Songs"}
+              </h2>
             </div>
 
-            {/* Playback controls */}
-            <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            {loading && (
+              <div style={{ textAlign: "center", padding: "40px" }}>
+                <p style={{ color: "rgba(255,255,255,0.5)" }}>Loading...</p>
+              </div>
+            )}
+
+            {!loading &&
+              displayTracks.map((track) => (
+                <div
+                  key={track.id}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "14px",
+                    padding: "12px",
+                    borderRadius: "10px",
+                    cursor: "pointer",
+                    marginBottom: "4px",
+                    background:
+                      currentTrack?.id === track.id
+                        ? "rgba(139, 92, 246, 0.2)"
+                        : "transparent",
+                  }}
+                  onClick={() => playTrack(track)}
+                  onMouseOver={(e) => {
+                    if (currentTrack?.id !== track.id)
+                      e.currentTarget.style.background =
+                        "rgba(255,255,255,0.05)";
+                  }}
+                  onMouseOut={(e) => {
+                    if (currentTrack?.id !== track.id)
+                      e.currentTarget.style.background = "transparent";
+                  }}
+                >
+                  <div style={{ position: "relative" }}>
+                    <img
+                      src={track.album.cover_small}
+                      alt={track.title}
+                      style={{
+                        width: "48px",
+                        height: "48px",
+                        borderRadius: "8px",
+                      }}
+                    />
+                    {currentTrack?.id === track.id && isPlaying && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          background: "rgba(0,0,0,0.5)",
+                          borderRadius: "8px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "2px",
+                            alignItems: "flex-end",
+                          }}
+                        >
+                          <div
+                            style={{
+                              width: "3px",
+                              height: "12px",
+                              background: "#8b5cf6",
+                              borderRadius: "2px",
+                              animation: "pulse 0.5s infinite alternate",
+                            }}
+                          />
+                          <div
+                            style={{
+                              width: "3px",
+                              height: "16px",
+                              background: "#8b5cf6",
+                              borderRadius: "2px",
+                              animation: "pulse 0.5s infinite alternate 0.1s",
+                            }}
+                          />
+                          <div
+                            style={{
+                              width: "3px",
+                              height: "10px",
+                              background: "#8b5cf6",
+                              borderRadius: "2px",
+                              animation: "pulse 0.5s infinite alternate 0.2s",
+                            }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p
+                      style={{
+                        fontSize: "15px",
+                        fontWeight: 500,
+                        margin: 0,
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {track.title}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "13px",
+                        color: "rgba(255,255,255,0.5)",
+                        margin: "2px 0 0 0",
+                      }}
+                    >
+                      {track.artist.name} • {track.album.title}
+                    </p>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "16px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "13px",
+                        color: "rgba(255,255,255,0.4)",
+                      }}
+                    >
+                      {Math.floor(track.duration / 60)}:
+                      {(track.duration % 60).toString().padStart(2, "0")}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(track);
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: "4px",
+                      }}
+                    >
+                      {isFavorite(track.id) ? (
+                        <FaHeart
+                          style={{ fontSize: "16px", color: "#ec4899" }}
+                        />
+                      ) : (
+                        <FaRegHeart
+                          style={{
+                            fontSize: "16px",
+                            color: "rgba(255,255,255,0.3)",
+                          }}
+                        />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+            {!loading && displayTracks.length === 0 && (
+              <div style={{ textAlign: "center", padding: "40px" }}>
+                <p style={{ color: "rgba(255,255,255,0.5)" }}>
+                  No songs found. Try searching for something!
+                </p>
+              </div>
+            )}
+          </div>
+        </main>
+
+        {/* ============================================================
+            RIGHT SIDEBAR - Now Playing
+            ============================================================ */}
+        {currentTrack && (
+          <aside
+            style={{
+              padding: "24px 16px",
+              borderLeft: "1px solid rgba(255,255,255,0.05)",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+            }}
+          >
+            {/* Album Art */}
+            <img
+              src={currentTrack.album.cover_medium}
+              alt={currentTrack.title}
+              style={{
+                width: "200px",
+                height: "200px",
+                borderRadius: "16px",
+                boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
+                marginBottom: "24px",
+              }}
+            />
+
+            {/* Track Info */}
+            <h3
+              style={{
+                fontSize: "20px",
+                fontWeight: 600,
+                margin: "0 0 4px 0",
+                textAlign: "center",
+                maxWidth: "100%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {currentTrack.title}
+            </h3>
+            <p
+              style={{
+                fontSize: "14px",
+                color: "rgba(255,255,255,0.6)",
+                margin: "0 0 4px 0",
+                textAlign: "center",
+              }}
+            >
+              {currentTrack.artist.name}
+            </p>
+            <p
+              style={{
+                fontSize: "13px",
+                color: "rgba(255,255,255,0.4)",
+                margin: "0 0 24px 0",
+                textAlign: "center",
+              }}
+            >
+              {currentTrack.album.title}
+            </p>
+
+            {/* Progress Bar */}
+            <div style={{ width: "100%", marginBottom: "8px" }}>
+              <div
+                style={{
+                  width: "100%",
+                  height: "4px",
+                  background: "rgba(255,255,255,0.1)",
+                  borderRadius: "2px",
+                  cursor: "pointer",
+                }}
+                onClick={handleProgressClick}
+              >
+                <div
+                  style={{
+                    width: `${progress}%`,
+                    height: "100%",
+                    background:
+                      "linear-gradient(90deg, #8b5cf6 0%, #ec4899 100%)",
+                    borderRadius: "2px",
+                    position: "relative",
+                  }}
+                >
+                  <div
+                    style={{
+                      position: "absolute",
+                      right: "-6px",
+                      top: "-4px",
+                      width: "12px",
+                      height: "12px",
+                      background: "white",
+                      borderRadius: "50%",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
+                    }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Time */}
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: "24px",
+              }}
+            >
+              <span
+                style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}
+              >
+                {formatTime(audioRef.current?.currentTime)}
+              </span>
+              <span
+                style={{ fontSize: "12px", color: "rgba(255,255,255,0.5)" }}
+              >
+                -
+                {formatTime(
+                  (audioRef.current?.duration || 0) -
+                    (audioRef.current?.currentTime || 0)
+                )}
+              </span>
+            </div>
+
+            {/* Playback Controls */}
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "24px",
+                marginBottom: "32px",
+              }}
+            >
               <button
                 onClick={playPrevious}
                 style={{
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  padding: "8px",
                   color: "rgba(255,255,255,0.7)",
                 }}
               >
-                <FaStepBackward style={{ fontSize: "18px" }} />
+                <FaStepBackward style={{ fontSize: "20px" }} />
               </button>
               <button
                 onClick={togglePlayPause}
                 style={{
-                  width: "52px",
-                  height: "52px",
+                  width: "60px",
+                  height: "60px",
                   borderRadius: "50%",
                   border: "none",
                   cursor: "pointer",
@@ -1218,15 +1317,15 @@ function App() {
                   alignItems: "center",
                   justifyContent: "center",
                   background:
-                    "linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)",
+                    "linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)",
                 }}
               >
                 {isPlaying ? (
-                  <FaPause style={{ fontSize: "18px", color: "white" }} />
+                  <FaPause style={{ fontSize: "20px", color: "white" }} />
                 ) : (
                   <FaPlay
                     style={{
-                      fontSize: "18px",
+                      fontSize: "20px",
                       color: "white",
                       marginLeft: "3px",
                     }}
@@ -1239,49 +1338,35 @@ function App() {
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  padding: "8px",
                   color: "rgba(255,255,255,0.7)",
                 }}
               >
-                <FaStepForward style={{ fontSize: "18px" }} />
+                <FaStepForward style={{ fontSize: "20px" }} />
               </button>
             </div>
 
-            {/* Volume control */}
+            {/* Volume Control */}
             <div
               style={{
+                width: "100%",
                 display: "flex",
                 alignItems: "center",
                 gap: "12px",
-                flex: 1,
-                justifyContent: "flex-end",
               }}
             >
-              <span
-                style={{
-                  fontSize: "13px",
-                  color: "rgba(255,255,255,0.5)",
-                  minWidth: "80px",
-                  textAlign: "right",
-                }}
-              >
-                {formatTime(audioRef.current?.currentTime)} /{" "}
-                {formatTime(audioRef.current?.duration)}
-              </span>
               <button
                 onClick={() => setIsMuted(!isMuted)}
                 style={{
                   background: "none",
                   border: "none",
                   cursor: "pointer",
-                  padding: "8px",
                   color: "rgba(255,255,255,0.5)",
                 }}
               >
                 {isMuted ? (
-                  <FaVolumeMute style={{ fontSize: "18px" }} />
+                  <FaVolumeMute style={{ fontSize: "16px" }} />
                 ) : (
-                  <FaVolumeUp style={{ fontSize: "18px" }} />
+                  <FaVolumeUp style={{ fontSize: "16px" }} />
                 )}
               </button>
               <input
@@ -1294,12 +1379,30 @@ function App() {
                   setVolume(parseFloat(e.target.value));
                   setIsMuted(false);
                 }}
-                style={{ width: "100px" }}
+                style={{ flex: 1, accentColor: "#8b5cf6" }}
               />
+              <span
+                style={{
+                  fontSize: "12px",
+                  color: "rgba(255,255,255,0.5)",
+                  minWidth: "35px",
+                }}
+              >
+                {Math.round((isMuted ? 0 : volume) * 100)}%
+              </span>
             </div>
-          </div>
-        </div>
-      )}
+          </aside>
+        )}
+      </div>
+
+      {/* Responsive styles for mobile */}
+      <style>{`
+        @media (max-width: 1024px) {
+          .main-layout {
+            grid-template-columns: 1fr !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
