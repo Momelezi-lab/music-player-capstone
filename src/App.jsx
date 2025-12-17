@@ -1,24 +1,3 @@
-/**
- * ============================================================================
- * MUSIC PLAYER APP - Capstone Project
- * Created by: Apiwe Fuziile
- * Cohort: 9
- * ============================================================================
- *
- * This is my music player application built with React and the Deezer API.
- * It allows users to search for songs, play 30-second previews, and save
- * their favorite tracks to localStorage for persistence.
- *
- * Key Features:
- * - Beautiful landing page with smooth transition
- * - Real-time music search using Deezer's free API
- * - Beautiful glassmorphism card design
- * - Now Playing bar with full playback controls
- * - Favorites system with localStorage persistence
- * - Fully responsive design for all screen sizes
- * ============================================================================
- */
-
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import {
