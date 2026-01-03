@@ -1,11 +1,11 @@
-# NovaBeat - Futuristic Music Player 🎵
+# NovaBeat - Futuristic Music Player
 
 A beautiful, responsive music player built with **React + Vite**, **Tailwind CSS**, and the **Deezer API**.  
 Search for any song or artist and play 30-second previews instantly — no login, no Spotify premium needed!
 
 ![NovaBeat Music Player](https://img.shields.io/badge/React-19.2.0-blue) ![Vite](https://img.shields.io/badge/Vite-7.2.4-646CFF) ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1.17-38B2AC)
 
-## ✨ Features
+## Features
 
 ### Core Features
 - **Search & Discover** - Search songs, artists, and albums in real-time using the Deezer API
@@ -56,7 +56,7 @@ Search for any song or artist and play 30-second previews instantly — no login
 4. **Open your browser**
    Navigate to `http://localhost:5173` (or the port shown in your terminal)
 
-## 🏗️ Building for Production
+## Building for Production
 
 ```bash
 npm run build
@@ -137,8 +137,7 @@ music-player-capstone-main/
 ├── vite.config.js       # Vite configuration
 └── tailwind.config.js   # Tailwind CSS configuration
 ```
-
-📝 License
+License
 
 This project is open source and available under the MIT License.
 
