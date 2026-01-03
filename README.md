@@ -8,19 +8,19 @@ Search for any song or artist and play 30-second previews instantly — no login
 ## ✨ Features
 
 ### Core Features
-- 🎵 **Search & Discover** - Search songs, artists, and albums in real-time using the Deezer API
-- 🎧 **Play Music** - Play 30-second song previews with native HTML5 audio controls
-- ❤️ **Favorites** - Save your favorite tracks for quick access
-- 📋 **Custom Playlists** - Create and manage your own playlists
-- 🕐 **Recently Played** - Automatic tracking of your listening history
-- 🔥 **Trending Tracks** - Discover popular music on load
+- **Search & Discover** - Search songs, artists, and albums in real-time using the Deezer API
+- **Play Music** - Play 30-second song previews with native HTML5 audio controls
+- **Favorites** - Save your favorite tracks for quick access
+- **Custom Playlists** - Create and manage your own playlists
+- **Recently Played** - Automatic tracking of your listening history
+- **Trending Tracks** - Discover popular music on load
 
 ### User Experience
-- 📱 **Fully Responsive** - Optimized for desktop, tablet, and mobile devices
-- 🎨 **Beautiful UI** - Glassmorphism design with gradient backgrounds
-- ⚡ **Smooth Animations** - Micro-interactions and transitions throughout
-- 🎯 **Error Handling** - User-friendly error messages and loading states
-- 💾 **Local Storage** - All your data (playlists, favorites) persists locally
+- **Fully Responsive** - Optimized for desktop, tablet, and mobile devices
+- **Beautiful UI** - Glassmorphism design with gradient backgrounds
+- **Smooth Animations** - Micro-interactions and transitions throughout
+- **Error Handling** - User-friendly error messages and loading states
+- **Local Storage** - All your data (playlists, favorites) persists locally
 
 ### Mobile Features
 -  **Collapsible Sidebar** - Slide-out menu on mobile devices
