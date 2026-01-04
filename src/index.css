@@ -204,8 +204,9 @@ body {
     grid-template-columns: 1fr !important;
   }
   
+  /* Don't hide sidebar on mobile - it's controlled by mobile-menu-open class */
   .left-sidebar {
-    display: none;
+    /* display: none; - Removed to allow mobile menu to work */
   }
 }
 

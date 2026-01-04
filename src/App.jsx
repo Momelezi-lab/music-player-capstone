@@ -171,6 +171,20 @@ function App() {
     return () => document.removeEventListener("click", handleClickOutside);
   }, [showAddToPlaylist]);
 
+  /**
+   * EFFECT: Prevent body scroll when mobile menu is open
+   */
+  useEffect(() => {
+    if (showMobileMenu) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [showMobileMenu]);
+
   // ============================================================================
   // LANDING PAGE FUNCTIONS
   // Handle the transition from landing page to main app
@@ -859,12 +873,16 @@ function App() {
             className="mobile-menu-btn"
             onClick={() => setShowMobileMenu(!showMobileMenu)}
             style={{
-              display: "none",
-              background: "none",
-              border: "none",
+              background: "rgba(15, 10, 30, 1)",
+              border: "1px solid rgba(255,255,255,0.1)",
+              borderRadius: "8px",
               cursor: "pointer",
               padding: "8px",
               color: "white",
+              zIndex: 1001,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
@@ -967,7 +985,6 @@ function App() {
               bottom: 0,
               background: "rgba(0,0,0,0.5)",
               zIndex: 998,
-              display: "none",
             }}
           />
         )}
@@ -1833,7 +1850,7 @@ function App() {
             ============================================================ */}
         {currentTrack && (
           <aside
-            className="now-playing-sidebar"
+            className={`now-playing-sidebar ${showMobileMenu ? "mobile-menu-open" : ""}`}
             style={{
               padding: "24px 16px",
               borderLeft: "1px solid rgba(255,255,255,0.05)",
@@ -2252,6 +2269,8 @@ function App() {
             flex-wrap: wrap !important;
             padding: 12px !important;
             gap: 12px !important;
+            position: relative !important;
+            z-index: 1000 !important;
           }
           
           .app-header > div:first-child {
@@ -2282,32 +2301,71 @@ function App() {
           
           .mobile-menu-btn {
             display: block !important;
+            min-width: 44px !important;
+            min-height: 44px !important;
+            touch-action: manipulation !important;
           }
           
           .left-sidebar {
             position: fixed !important;
-            top: 65px !important;
-            left: -100% !important;
+            top: 0 !important;
+            left: 0 !important;
+            transform: translateX(-100%) !important;
             width: 280px !important;
-            height: calc(100vh - 65px) !important;
+            max-width: 85vw !important;
+            height: 100vh !important;
             background: rgba(15, 10, 30, 0.98) !important;
             backdrop-filter: blur(20px) !important;
             z-index: 999 !important;
-            transition: left 0.3s ease !important;
+            transition: transform 0.3s ease !important;
             border-right: 1px solid rgba(255,255,255,0.1) !important;
             box-shadow: 2px 0 20px rgba(0,0,0,0.3) !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            padding: 77px 16px 24px 16px !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            display: block !important;
           }
           
           .left-sidebar.mobile-menu-open {
-            left: 0 !important;
+            transform: translateX(0) !important;
+          }
+          
+          /* Ensure sidebar is visible when open - more specific selector */
+          aside.left-sidebar.mobile-menu-open {
+            transform: translateX(0) !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+          
+          /* Ensure all sidebar content is visible */
+          .left-sidebar > * {
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+          
+          /* Prevent grid from constraining the sidebar */
+          .main-grid-layout {
+            position: relative !important;
+            overflow: visible !important;
+          }
+          
+          /* Ensure html doesn't have overflow hidden when menu is open */
+          html {
+            overflow: visible !important;
           }
           
           .mobile-menu-overlay {
             display: block !important;
+            touch-action: manipulation !important;
           }
           
           .mobile-close-btn {
             display: block !important;
+            min-width: 44px !important;
+            min-height: 44px !important;
+            touch-action: manipulation !important;
           }
           
           .main-content {
@@ -2336,6 +2394,42 @@ function App() {
             z-index: 1000 !important;
             overflow-y: auto !important;
             padding: 16px 12px !important;
+            transition: max-height 0.3s ease, padding 0.3s ease !important;
+          }
+          
+          /* Minimize now-playing sidebar when mobile menu is open */
+          .now-playing-sidebar.mobile-menu-open {
+            max-height: 80px !important;
+            padding: 8px 12px !important;
+            overflow: hidden !important;
+          }
+          
+          /* Hide all content when minimized */
+          .now-playing-sidebar.mobile-menu-open > img,
+          .now-playing-sidebar.mobile-menu-open > h3,
+          .now-playing-sidebar.mobile-menu-open > p,
+          .now-playing-sidebar.mobile-menu-open > div:nth-child(5),
+          .now-playing-sidebar.mobile-menu-open > div:nth-child(6),
+          .now-playing-sidebar.mobile-menu-open > div:nth-child(8) {
+            display: none !important;
+          }
+          
+          /* Show only playback controls (7th child) when minimized */
+          .now-playing-sidebar.mobile-menu-open > div:nth-child(7) {
+            display: flex !important;
+            width: 100% !important;
+            justify-content: center !important;
+            align-items: center !important;
+            gap: 16px !important;
+            margin: 0 !important;
+          }
+          
+          /* Adjust button sizes when minimized */
+          .now-playing-sidebar.mobile-menu-open > div:nth-child(7) button {
+            width: 44px !important;
+            height: 44px !important;
+            min-width: 44px !important;
+            min-height: 44px !important;
           }
           
           .now-playing-sidebar img {
